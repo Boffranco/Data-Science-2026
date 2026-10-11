@@ -1,49 +1,53 @@
-# Premier League Data Science Project: Proyección Histórica y Predictiva de DTs Británicos vs. Extranjeros (1993 - 2026)
+# 🏆 Premier League: Análisis Predictivo de Clasificación a Champions League y Perfiles de DTs (1993 - 2026)
 
-## 1. Resumen del Proyecto
-Este proyecto analiza más de 30 años de competencia en la Premier League inglesa (1993 a 2026), integrando resultados oficiales de partidos, estadísticas de rendimiento en cancha y el historial de nacionalidades de los directores técnicos. 
+## 📌 1. Resumen del Proyecto
+Este proyecto analiza más de 30 temporadas de la Premier League inglesa (1993-2026), explorando la evolución competitiva y táctica de los equipos y sus cuerpos técnicos. Se investiga la transformación histórica de la liga —desde una presencia mayoritaria de entrenadores británicos en los años 90 hacia una creciente internacionalización táctica— y su impacto en el acceso a las plazas de la élite europea.
 
-El foco del estudio radica en la transformación estructural de la liga: de un dominio absoluto de directores técnicos británicos en la década de 1990 hacia la internacionalización táctica moderna. A través de un flujo integral de Data Science, se modela el rendimiento competitivo por partido y por temporada para **proyectar a 10 años la probabilidad y porcentaje de entrenadores locales (británicos) vs. extranjeros de coronarse campeones**.
+Mediante un flujo integral de Data Science, el estudio modela el rendimiento competitivo por partido y por temporada para **proyectar a 10 años la probabilidad y proporción de directores técnicos británicos vs. extranjeros clasificados a la UEFA Champions League (Top 4)**.
 
 ---
 
-## 2. Objetivos del Proyecto
+## 🎯 2. Objetivos del Proyecto
 
 ### Objetivo General
-Desarrollar un sistema analítico y predictivo mediante modelos de Machine Learning para estimar el rendimiento competitivo de los equipos según el origen de su cuerpo técnico, evaluando la tendencia de éxito y proyectando el porcentaje de clasificación a Champions League (top 4) británicos vs. extranjeros para la próxima década.
+Modelar el rendimiento histórico de los equipos en la Premier League para estimar y proyectar a 10 años el porcentaje y la probabilidad de clasificación a la UEFA Champions League (Top 4) de equipos comandados por directores técnicos británicos vs. extranjeros.
 
-### Objetivos Específicos
-1. **Análisis Exploratorio de Datos (AED - Pre-entrega 2):**
-   * Examinar la evolución histórica de la proporción de DTs británicos y extranjeros en el banquillo.
-   * Identificar la relación entre la nacionalidad del DT, el volumen de juego (goles, tiros, efectividad defensiva) y los puntos obtenidos.
-   * Evaluar la ventaja de localía (*home advantage*) y el impacto disciplinario (tarjetas, faltas) a lo largo de las décadas.
-2. **Modelos de Aprendizaje Supervisado (Pre-entrega 3):**
-   * **Clasificación:** Predecir el resultado de los partidos (`FTR`: Local, Empate, Visitante) incorporando features tácticas y de dirección técnica, optimizando hiperparámetros y evitando el sobreajuste.
-   * **Regresión:** Estimar los puntos acumulados por temporada para evaluar la probabilidad final de campeonato de cada equipo.
-3. **Modelos de Aprendizaje No Supervisado (Pre-entrega 4):**
-   * Implementar algoritmos de agrupamiento (*clustering*) sobre los directores técnicos y equipos para caracterizar perfiles de juego (ofensivo, reactivo, posesión) y evaluar si los estilos correlacionan con la nacionalidad.
-4. **Proyección y Storytelling (Entrega Final):**
-   * Modelar series temporales y escenarios de simulación a 10 años sobre la presencia y probabilidad de título para técnicos locales vs. extranjeros.
+### Objetivos Específicos por Etapa
 
----
+* **Pre-entrega 2 (Análisis Exploratorio de Datos):**
+  * Limpiar y consolidar la base histórica de más de 12.000 partidos disputados entre 1993 y 2026.
+  * Examinar la evolución histórica en la contratación de DTs británicos y extranjeros en el banquillo.
+  * Analizar la brecha de rendimiento en puntos por partido (PPG), volumen ofensivo (goles, tiros) y ventaja de localía entre ambos perfiles en la disputa por los primeros puestos.
 
-## 📂 3. Datasets Utilizados
-* **Resultados y Estadísticas de Partidos:** Descargados desde [Football-Data.co.uk](https://www.football-data.co.uk/), que contiene el registro detallado fecha a fecha, goles al descanso y final, tiros al arco, faltas, córners y cuotas de apuestas desde 1993/94 hasta 2025/26.
-* **Historial de Directores Técnicos:** Extracción y consolidación de periodos de gestión de entrenadores (fecha de inicio, fecha de fin y nacionalidad), cruzado con la fecha exacta de cada partido disputado.
+* **Pre-entrega 3 (Aprendizaje Supervisado):**
+  * **Regresión:** Estimar la cantidad de puntos totales por temporada que obtendrá cada equipo para evaluar si supera el umbral histórico necesario para acceder a Champions League (~71 puntos).
+  * **Clasificación:** Predecir de forma directa si un equipo conseguirá la clasificación a UEFA Champions League (`1: Top 4`, `0: Fuera de Champions`), optimizando hiperparámetros y evaluando mediante métricas robustas (curvas ROC-AUC, F1-Score y matriz de confusión).
+
+* **Pre-entrega 4 (Aprendizaje No Supervisado - Clustering):**
+  * Aplicar algoritmos de clustering (K-Means) para caracterizar estilos tácticos de juego (volumen ofensivo, efectividad de remates, solidez defensiva y disciplina), identificando si los técnicos locales conforman un clúster diferenciado frente a la élite europea.
+
+* **Entrega Final (Storytelling y Proyección):**
+  * Desarrollar una proyección analítica a 10 años que estime cuántos directores técnicos británicos lograrán clasificar a la Champions League, comunicando conclusiones mediante visualizaciones orientadas a la toma de decisiones deportivas.
 
 ---
 
-## 🛠️️ 4. Estructura del Repositorio
+## 3. Datasets Utilizados
+* **Resultados y Estadísticas de Partidos:** Registros extraídos de [Football-Data.co.uk](https://www.football-data.co.uk/) (1993 a 2026), incluyendo goles, tiros al arco, faltas, córners y cuotas de mercado.
+* **Directores Técnicos:** Base curada de entrenadores, nacionalidades (británicos vs. extranjeros) y períodos de gestión temporal vinculados a cada encuentro.
+
+---
+
+## 🛠 4. Estructura del Repositorio
 ```text
 ├── data/
-│   ├── raw/                      # Archivos CSV por temporada y registros originales
-│   └── processed/                # Datasets consolidados y cruzados por fecha
+│   ├── raw/                       # Archivos CSV por temporada descargados
+│   └── processed/                 # Dataset curado y unificado para modelar
 ├── notebooks/
-│   ├── 01_analisis_exploratorio.ipynb    # Pre-entrega 2: AED, calidad de datos y visualización
-│   ├── 02_modelos_supervisados.ipynb     # Pre-entrega 3: Clasificación y Regresión
-│   └── 03_clustering_no_supervisado.ipynb # Pre-entrega 4: Agrupamiento de estilos tácticos
+│   ├── 01_analisis_exploratorio.ipynb     # Pre-entrega 2: AED y calidad de datos
+│   ├── 02_modelos_supervisados.ipynb      # Pre-entrega 3: Clasificación y Regresión
+│   └── 03_clustering_no_supervisado.ipynb  # Pre-entrega 4: Agrupamiento de estilos
 ├── src/
-│   ├── download_datos.py         # Descarga automatizada de temporadas
-│   └── procesar_dts.py           # Cruce y estandarización de partidos y directores técnicos
-├── requirements.txt              # Librerías y dependencias
-└── README.md                     # Documentación general del proyecto
+│   ├── download_datos.py          # Descarga automatizada de temporadas
+│   └── curar_y_cruzar_dts.py      # Limpieza y cruce cronológico de entrenadores
+├── requirements.txt               # Dependencias del entorno
+└── README.md            # Documentación general del proyecto
