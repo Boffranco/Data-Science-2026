@@ -1,0 +1,18 @@
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Entornos virtuales y caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+env/
+.venv/
+
+# Configuraciones locales de VS Code y sistema operativo
+.vscode/
+.DS_Store
+Thumbs.db
