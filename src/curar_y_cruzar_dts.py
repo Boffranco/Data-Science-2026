@@ -1,7 +1,6 @@
 """
 Script: curar_y_cruzar_dts.py
-Limpia partidos_consolidados.csv y asigna correctamente la nacionalidad
-y perfil del DT evitando data loss y errores de fechas.
+Limpia partidos_consolidados.csv y cruza directores tecnicos historicos sin colisiones de nombres.
 """
 
 import os
@@ -10,60 +9,44 @@ import numpy as np
 
 print("=== INICIANDO CURACIÓN Y CRUCE DE DATOS ===")
 
-# 1. Cargar partidos consolidados
-input_path = "data/processed/partidos_consolidados.csv"
-if not os.path.exists(input_path):
-    # Si está en el directorio actual
-    input_path = "partidos_consolidados.csv"
+# 1. Rutas seguras
+ruta_partidos = "data/processed/partidos_consolidados.csv"
+if not os.path.exists(ruta_partidos):
+    ruta_partidos = "partidos_consolidados.csv"
 
-df_raw = pd.read_csv(input_path, low_memory=False)
+df_raw = pd.read_csv(ruta_partidos, low_memory=False)
 
-# 2. Filtrar filas inválidas (eliminar filas de managers concatenadas por error y filas vacías)
+# 2. Filtrar filas residuales de managers o filas sin datos de partido
 df_partidos = df_raw[df_raw['temporada_origen'] != 'managers_transfermarkt.csv'].copy()
 df_partidos = df_partidos.dropna(subset=['HomeTeam', 'AwayTeam', 'Date'])
 
-# Parsear fechas de forma robusta
-df_partidos['Date'] = pd.to_datetime(df_partidos['Date'], format='mixed', dayfirst=True)
+# 3. SOLUCIÓN AL ERROR: Eliminar cualquier columna residual previa para evitar colisiones _x e _y
+cols_residuales = [
+    'dt_nombre', 'nacionalidad', 'fecha_inicio', 'fecha_fin', 'es_britanico', 'equipo',
+    'dt_home', 'nacionalidad_dt_home', 'es_britanico_dt_home',
+    'dt_away', 'nacionalidad_dt_away', 'es_britanico_dt_away'
+]
+df_partidos = df_partidos.drop(columns=[c for c in cols_residuales if c in df_partidos.columns])
+
+# 4. Parsear fechas y ordenar
+df_partidos['Date'] = pd.to_datetime(df_partidos['Date'].astype(str), format='mixed', dayfirst=True)
 df_partidos = df_partidos.sort_values('Date').reset_index(drop=True)
 
-print(f"✓ Partidos válidos recuperados: {len(df_partidos)}")
+print(f"✓ Partidos válidos a procesar: {len(df_partidos)}")
 
-# 3. Normalizar nombres de equipos
+# 5. Normalizar nombres de equipos
 mapeo_equipos = {
     'Man United': 'Manchester United',
     'Man City': 'Manchester City',
     'Spurs': 'Tottenham Hotspur',
     'Tottenham': 'Tottenham Hotspur',
     "Nott'm Forest": 'Nottingham Forest',
-    'Wolves': 'Wolverhampton Wanderers',
-    'West Brom': 'West Bromwich Albion',
-    'Sheffield Weds': 'Sheffield Wednesday',
-    'QPR': 'Queens Park Rangers',
-    'Blackburn': 'Blackburn Rovers',
-    'Bolton': 'Bolton Wanderers',
-    'Charlton': 'Charlton Athletic',
-    'Middlesboro': 'Middlesbrough',
-    'Coventry': 'Coventry City',
-    'Ipswich': 'Ipswich Town',
-    'Leicester': 'Leicester City',
-    'Norwich': 'Norwich City',
-    'Oldham': 'Oldham Athletic',
-    'Swindon': 'Swindon Town',
-    'Bradford': 'Bradford City',
-    'Cardiff': 'Cardiff City',
-    'Huddersfield': 'Huddersfield Town',
-    'Wigan': 'Wigan Athletic',
-    'Leeds': 'Leeds United',
-    'Stoke': 'Stoke City',
-    'Birmingham': 'Birmingham City',
-    'Derby': 'Derby County'
+    'Wolves': 'Wolverhampton Wanderers'
 }
-
 df_partidos['HomeTeam'] = df_partidos['HomeTeam'].replace(mapeo_equipos)
 df_partidos['AwayTeam'] = df_partidos['AwayTeam'].replace(mapeo_equipos)
 
-# 4. Tabla histórica curada de DTs principales y nacionalidades (Muestra representativa de eras)
-# Se define nacionalidad británica: Inglaterra, Escocia, Gales, Irlanda del Norte
+# 6. Base curada histórica de DTs principales (1993 - 2026)
 dts_historicos = [
     # Manchester United
     ('Manchester United', 'Alex Ferguson', 'Scotland', 1, '1986-11-06', '2013-05-19'),
@@ -138,67 +121,61 @@ dts_historicos = [
     ('Aston Villa', 'Steven Gerrard', 'England', 1, '2021-11-11', '2022-10-20'),
     ('Aston Villa', 'Unai Emery', 'Spain', 0, '2022-11-01', '2026-06-30'),
 
-    # Everton
-    ('Everton', 'Howard Kendall', 'England', 1, '1990-11-05', '1993-12-04'),
-    ('Everton', 'Joe Royle', 'England', 1, '1994-11-10', '1997-03-27'),
-    ('Everton', 'Walter Smith', 'Scotland', 1, '1998-07-01', '2002-03-13'),
-    ('Everton', 'David Moyes', 'Scotland', 1, '2002-03-15', '2013-05-19'),
-    ('Everton', 'Roberto Martinez', 'Spain', 0, '2013-06-05', '2016-05-12'),
-    ('Everton', 'Marco Silva', 'Portugal', 0, '2018-05-31', '2019-12-05'),
-    ('Everton', 'Carlo Ancelotti', 'Italy', 0, '2019-12-21', '2021-06-01'),
-    ('Everton', 'Frank Lampard', 'England', 1, '2022-01-31', '2023-01-23'),
-    ('Everton', 'Sean Dyche', 'England', 1, '2023-01-30', '2026-06-30'),
+    # Tottenham Hotspur
+    ('Tottenham Hotspur', 'Osvaldo Ardiles', 'Argentina', 0, '1993-06-19', '1994-11-01'),
+    ('Tottenham Hotspur', 'Gerry Francis', 'England', 1, '1994-11-15', '1997-11-19'),
+    ('Tottenham Hotspur', 'Christian Gross', 'Switzerland', 0, '1997-11-20', '1998-09-05'),
+    ('Tottenham Hotspur', 'George Graham', 'Scotland', 1, '1998-10-01', '2001-03-16'),
+    ('Tottenham Hotspur', 'Glenn Hoddle', 'England', 1, '2001-04-02', '2003-09-21'),
+    ('Tottenham Hotspur', 'Martin Jol', 'Netherlands', 0, '2004-11-05', '2007-10-25'),
+    ('Tottenham Hotspur', 'Juande Ramos', 'Spain', 0, '2007-10-27', '2008-10-25'),
+    ('Tottenham Hotspur', 'Harry Redknapp', 'England', 1, '2008-10-26', '2012-06-13'),
+    ('Tottenham Hotspur', 'Andre Villas-Boas', 'Portugal', 0, '2012-07-03', '2013-12-16'),
+    ('Tottenham Hotspur', 'Mauricio Pochettino', 'Argentina', 0, '2014-05-27', '2019-11-19'),
+    ('Tottenham Hotspur', 'Jose Mourinho', 'Portugal', 0, '2019-11-20', '2021-04-19'),
+    ('Tottenham Hotspur', 'Antonio Conte', 'Italy', 0, '2021-11-02', '2023-03-26'),
+    ('Tottenham Hotspur', 'Ange Postecoglou', 'Australia', 0, '2023-06-06', '2026-06-30')
 ]
 
-df_dts = pd.DataFrame(dts_historicos, columns=[
-    'equipo', 'dt_nombre', 'nacionalidad', 'es_britanico', 'fecha_inicio', 'fecha_fin'
-])
+df_dts = pd.DataFrame(dts_historicos, columns=['equipo', 'dt_nombre', 'nacionalidad', 'es_britanico', 'fecha_inicio', 'fecha_fin'])
 df_dts['fecha_inicio'] = pd.to_datetime(df_dts['fecha_inicio'])
 df_dts['fecha_fin'] = pd.to_datetime(df_dts['fecha_fin'])
 
-# 5. Función de cruce temporal sin pérdida de partidos
-def cruzar_con_partidos(df_base, df_entrenadores, col_equipo, prefijo):
-    df_merged = pd.merge(df_base, df_entrenadores, left_on=col_equipo, right_on='equipo', how='left')
+# 7. Cruce temporal estricto sin pérdida de filas
+def cruzar_dt(df_base, df_entrenadores, col_equipo, prefijo):
+    m = pd.merge(df_base, df_entrenadores, left_on=col_equipo, right_on='equipo', how='left')
     
-    # Condición de fecha válida
-    en_fecha = (df_merged['Date'] >= df_merged['fecha_inicio']) & (df_merged['Date'] <= df_merged['fecha_fin'])
-    df_validos = df_merged[en_fecha].drop_duplicates(subset=['Date', col_equipo])
+    # Condición de fecha de gestión
+    valid = m[(m['Date'] >= m['fecha_inicio']) & (m['Date'] <= m['fecha_fin'])].drop_duplicates(subset=['Date', col_equipo])
     
-    # Para los partidos donde no hay DT puntual registrado (clubes menores o interinos antiguos),
-    # hacemos un merge de fallback para mantener el 100% de los partidos:
-    # Si el partido es anterior al 2000, la probabilidad histórica de DT británico era ~95%
-    df_final = pd.merge(
-        df_base,
-        df_validos[['Date', col_equipo, 'dt_nombre', 'nacionalidad', 'es_britanico']],
-        on=['Date', col_equipo],
-        how='left'
-    )
+    # Left join con el dataset base de partidos
+    res = pd.merge(df_base, valid[['Date', col_equipo, 'dt_nombre', 'nacionalidad', 'es_britanico']], on=['Date', col_equipo], how='left')
     
-    # Imputación guiada por el contexto del negocio:
-    # Años 90s: técnicos casi exclusivamente británicos
-    es_brit_imputado = np.where(df_final['Date'].dt.year < 2005, 1, 0)
-    df_final['es_britanico'] = df_final['es_britanico'].fillna(pd.Series(es_brit_imputado, index=df_final.index))
-    df_final['nacionalidad'] = df_final['nacionalidad'].fillna(np.where(df_final['es_britanico'] == 1, 'United Kingdom', 'Other'))
-    df_final['dt_nombre'] = df_final['dt_nombre'].fillna('DT No Registrado')
+    # Imputación de contexto: antes de 2005 los entrenadores eran mayoritariamente británicos (>90%)
+    default_brit = (res['Date'].dt.year < 2005).astype(float)
+    res['es_britanico'] = res['es_britanico'].fillna(pd.Series(default_brit, index=res.index))
+    res['nacionalidad'] = np.where(res['nacionalidad'].isna(), 
+                                   np.where(res['es_britanico'] == 1.0, 'United Kingdom', 'Other'),
+                                   res['nacionalidad'])
+    res['dt_nombre'] = res['dt_nombre'].fillna('DT No Registrado')
     
-    df_final = df_final.rename(columns={
+    return res.rename(columns={
         'dt_nombre': f'dt_{prefijo}',
         'nacionalidad': f'nacionalidad_dt_{prefijo}',
         'es_britanico': f'es_britanico_dt_{prefijo}'
     })
-    return df_final
 
-print("Cruzando directores técnicos para local y visitante...")
-df_resultado = cruzar_con_partidos(df_partidos, df_dts, 'HomeTeam', 'home')
-df_resultado = cruzar_con_partidos(df_resultado, df_dts, 'AwayTeam', 'away')
+print("Cruzando directores técnicos locales y visitantes...")
+df_final = cruzar_dt(df_partidos, df_dts, 'HomeTeam', 'home')
+df_final = cruzar_dt(df_final, df_dts, 'AwayTeam', 'away')
 
-# 6. Guardar dataset limpio y final
+# 8. Exportar dataset final
 output_dir = "data/processed"
 os.makedirs(output_dir, exist_ok=True)
-output_file = os.path.join(output_dir, "dataset_final_curado.csv")
-df_resultado.to_csv(output_file, index=False)
+salida = os.path.join(output_dir, "dataset_final_modelo.csv")
+df_final.to_csv(salida, index=False)
 
-print(f"\n¡ÉXITO TOTAL!")
-print(f"Dataset guardado en: {output_file}")
-print(f"Total de partidos conservados: {len(df_resultado)} filas")
-print(f"Distribución DT Local Británico:\n{df_resultado['es_britanico_dt_home'].value_counts(normalize=True).round(3)}")
+print(f"\n✓ CRUCE COMPLETADO EXITOSAMENTE: {salida}")
+print(f"Total de partidos conservados: {len(df_final)} filas (100% de los datos)")
+print(f"\nDistribución de DTs Locales Británicos:")
+print(df_final['es_britanico_dt_home'].value_counts())
