@@ -37,17 +37,39 @@ Modelar el rendimiento histórico de los equipos en la Premier League para estim
 
 ---
 
-## 🛠 4. Estructura del Repositorio
+## 4. Hallazgos del análisis exploratorio
+Entre los 33 campeones, 13 tuvieron DT británico, pero ninguno desde 2013/14. Detectamos que en cerca del 70% de los equipos-temporada el DT figura como "No Registrado" y el dataset le asigna un origen según el año; por eso los análisis de nacionalidad usan solo los DT registrados.
+
+## 5. Modelos ajustados
+**Supervisado:** predecimos si un equipo termina Top 4 usando solo información de temporadas anteriores, con partición y validación temporal. Comparamos cinco modelos contra un baseline; el mejor fue la regresión logística (acertó 9 de 16 cupos en el test). Con un modelo Beta-Binomial proyectamos los campeones británicos: menos de 1 en 10 años con la historia reciente y cerca de 4 con toda la historia; el backtest mostró que el método falla, por eso son escenarios.
+
+**No supervisado:** K-Means separó los equipos-temporada en "Dominante" y "Resto de la liga" (Silhouette 0,354 tras la mejora). El grupo Dominante concentra 102 de los 104 Top 4. DBSCAN no encontró grupos por densidad, así que los equipos forman un continuo de niveles.
+
+## 6. Conclusiones y limitaciones
+Los DT extranjeros dominan hoy la cima, pero no podemos afirmar causalidad: también cambiaron la época y el tamaño de los clubes. Limitaciones: solo 30% de los equipos-temporada tiene DT registrado, el test es chico (80 filas) y "Top 4" aproxima la clasificación real a Champions.
+
+## 🛠 7. Estructura del repositorio
 ```text
 ├── data/
-│   ├── raw/                       # Archivos CSV por temporada descargados
-│   └── processed/                 # Dataset curado y unificado para modelar
+│   ├── raw/                         # CSV por temporada (Football-Data.co.uk)
+│   └── processed/                   # Datasets curados y tablas para modelar
+│       ├── dataset_final_modelo.csv
+│       ├── tabla_temporadas.csv         # posición, puntos y Top 4 por equipo-temporada
+│       ├── tabla_equipo_temporada.csv   # variables de juego para clustering
+│       ├── features_clustering.csv      # variables escaladas para K-Means
+│       └── clusters_kmeans_base.csv
 ├── notebooks/
-│   ├── 01_analisis_exploratorio.ipynb     # Pre-entrega 2: AED y calidad de datos
-│   ├── 02_modelos_supervisados.ipynb      # Pre-entrega 3: Clasificación y Regresión
-│   └── 03_clustering_no_supervisado.ipynb  # Pre-entrega 4: Agrupamiento de estilos
+│   ├── juntar_csv.ipynb                   # Unión de las temporadas
+│   ├── exploracion_dataset.ipynb          # Pre-entrega 2: AED
+│   ├── 02_modelos_supervisados.ipynb      # Pre-entrega 3: clasificación, regresión y proyección
+│   ├── 03_modelos_no_supervisados.ipynb   # Pre-entrega 4 (parte 1): AED y preprocesamiento
+│   ├── 03b_kmeans_base.ipynb              # Pre-entrega 4 (parte 2): K-Means base y elección de k
+│   └── 03c_mejora_interpretacion.ipynb    # Pre-entrega 4 (parte 3): mejora, interpretación y DBSCAN
 ├── src/
-│   ├── download_datos.py          # Descarga automatizada de temporadas
-│   └── curar_y_cruzar_dts.py      # Limpieza y cruce cronológico de entrenadores
-├── requirements.txt               # Dependencias del entorno
-└── README.md            # Documentación general del proyecto
+│   ├── download_datos.py                  # Descarga de temporadas
+│   ├── procesar_dts.py                    # Obtención de DT
+│   ├── curar_y_cruzar_dts.py              # Limpieza y cruce de DT por fecha
+│   └── construir_tabla_temporadas.py      # Tabla equipo-temporada con posición oficial
+├── requirements.txt
+└── README.md
+```
