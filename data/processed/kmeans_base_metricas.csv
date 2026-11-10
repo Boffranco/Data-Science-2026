@@ -1,0 +1,10 @@
+k,inercia,silhouette,pct_cluster_min,cumple_5pct,ari_medio,ari_minimo,estabilidad
+2,3792.2714,0.2572,31.1538,True,0.9979,0.9921,estable
+3,3017.9601,0.2408,25.3846,True,1.0,1.0,estable
+4,2752.2105,0.2229,14.0385,True,0.986,0.9526,estable
+5,2528.4723,0.2016,9.2308,True,0.9828,0.9322,estable
+6,2356.9313,0.1747,9.2308,True,0.9294,0.8473,estable
+7,2243.5539,0.1648,9.4231,True,0.8443,0.6391,moderada
+8,2148.0647,0.1567,9.4231,True,0.7187,0.5018,no confiable
+9,2056.8267,0.1595,6.7308,True,0.671,0.4642,no confiable
+10,1984.3362,0.1535,6.7308,True,0.6621,0.4548,no confiable
